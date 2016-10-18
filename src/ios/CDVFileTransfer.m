@@ -254,7 +254,7 @@ static CFIndex WriteDataToStream(NSData* data, CFWriteStreamRef stream)
                     }
                 } else {
                     if (totalPayloadLength > 0) {
-                    WriteDataToStream(fileData, writeStream);
+                        WriteDataToStream(fileData, writeStream);
                     } else {
                         NSLog(@"Uploading of an empty file is not supported for chunkedMode=true and multipart=false");
                     }
@@ -453,8 +453,10 @@ static CFIndex WriteDataToStream(NSData* data, CFWriteStreamRef stream)
             errorCode = FILE_NOT_FOUND_ERR;
             NSLog(@"File Transfer Error: Invalid file path or URL %@", target);
         }
-    } else if ([activeTransfers objectForKey:objectId] != nil) {
-        errorCode = CONNECTION_ERR;
+    }
+    
+    if ([activeTransfers count] > 0) {
+        errorCode = NO_CONCURRENT_DOWNLOADS;
         NSLog(@"Connection Error: Downloads must be one at a time.");
     }
     
