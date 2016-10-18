@@ -808,7 +808,7 @@ static CFIndex WriteDataToStream(NSData* data, CFWriteStreamRef stream)
         }
         
         int currentPercent = (int)((self.bytesTransfered * 100.0) / self.bytesExpected);
-        if (self.percentTransfered == currentPercent) {
+        if (self.percentTransfered == currentPercent || currentPercent % 5 != 0) {
             return;
         } else {
             self.percentTransfered = currentPercent;
