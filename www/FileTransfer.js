@@ -31,6 +31,7 @@ function newProgressEvent(result) {
     pe.lengthComputable = result.lengthComputable;
     pe.loaded = result.loaded;
     pe.total = result.total;
+    pe.percent = result.percent;
     return pe;
 }
 
@@ -175,9 +176,9 @@ FileTransfer.prototype.upload = function(filePath, server, successCallback, erro
  * @param trustAllHosts {Boolean} Optional trust all hosts (e.g. for self-signed certs), defaults to false
  * @param options {FileDownloadOptions} Optional parameters such as headers
  */
-FileTransfer.prototype.download = function(source, target, successCallback, errorCallback, trustAllHosts, options) {
+FileTransfer.prototype.download = function(source, target, successCallback, errorCallback, onProgressCallback, trustAllHosts, options) {
     argscheck.checkArgs('ssFF*', 'FileTransfer.download', arguments);
-    var self = this;
+//    var self = this;
 
     var basicAuthHeader = getBasicAuthHeader(source);
     if (basicAuthHeader) {
@@ -199,8 +200,8 @@ FileTransfer.prototype.download = function(source, target, successCallback, erro
 
     var win = function(result) {
         if (typeof result.lengthComputable != "undefined") {
-            if (self.onprogress) {
-                return self.onprogress(newProgressEvent(result));
+            if (onProgressCallback && result.lengthComputable) {
+                return onProgressCallback(newProgressEvent(result));
             }
         } else if (successCallback) {
             var entry = null;
@@ -225,7 +226,7 @@ FileTransfer.prototype.download = function(source, target, successCallback, erro
         errorCallback(error);
     };
 
-    exec(win, fail, 'FileTransfer', 'download', [source, target, trustAllHosts, this._id, headers]);
+    exec(win, fail, 'FileTransfer', 'download', [source, target, trustAllHosts, 1, headers]);
 };
 
 /**
