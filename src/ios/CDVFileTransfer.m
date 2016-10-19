@@ -632,6 +632,15 @@ static CFIndex WriteDataToStream(NSData* data, CFWriteStreamRef stream)
             self.targetFileHandle = nil;
             DLog(@"File Transfer Download success");
             
+            NSString* filePath = [self targetFilePath];
+            
+            NSString* filename = [[self.targetURL.absoluteString componentsSeparatedByString:@"/"] lastObject];
+            NSString* pathBase = [[[self targetFilePath] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent];
+            NSString* finalPath = [NSString stringWithFormat:@"%@/%@", pathBase, filename];
+            
+            NSError *error = nil;
+            [[NSFileManager defaultManager] moveItemAtPath:filePath toPath:finalPath error:&error];
+            
             result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self.filePlugin makeEntryForURL:self.targetURL]];
         } else {
             downloadResponse = [[NSString alloc] initWithData:self.responseData encoding:NSUTF8StringEncoding];
@@ -703,7 +712,13 @@ static CFIndex WriteDataToStream(NSData* data, CFWriteStreamRef stream)
         // Extract the path part out of a file: URL.
         path = [self.target hasPrefix:@"/"] ? [self.target copy] : [(NSURL *)[NSURL URLWithString:self.target] path];
     }
-    return path;
+    
+    // create temporary directory for target file.
+    NSString* filename = [[path componentsSeparatedByString:@"/"] lastObject];
+    NSString* pathBase = [path stringByDeletingLastPathComponent];
+    NSString* finalPath = [NSString stringWithFormat:@"%@/temp/%@", pathBase, filename];
+    
+    return finalPath;
 }
 
 - (void)connection:(NSURLConnection*)connection didReceiveResponse:(NSURLResponse*)response
